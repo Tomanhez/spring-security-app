@@ -17,16 +17,19 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
 		UserBuilder users = User.withDefaultPasswordEncoder();// obsolete
 
 		auth.inMemoryAuthentication().withUser(users.username("john").password("test123").roles("EMPLOYEE"));
-		auth.inMemoryAuthentication().withUser(users.username("merry").password("test123").roles("MENAGER"));
-		auth.inMemoryAuthentication().withUser(users.username("susan").password("test123").roles("ADMIN"));
+		auth.inMemoryAuthentication().withUser(users.username("merry").password("test123").roles("EMPLOYEE","MANAGERS"));
+		auth.inMemoryAuthentication().withUser(users.username("susan").password("test123").roles("EMPLOYEE","ADMIN"));
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.
 		authorizeRequests().
-		anyRequest().
-		authenticated().
+		//anyRequest().
+		//authenticated().
+		antMatchers("/").hasRole("EMPLOYEE").
+		antMatchers("/leaders/**").hasRole("MANAGERS").
+		antMatchers("/systems/**").hasRole("ADMIN").
 		and().
 		formLogin().
 		loginPage("/showMyLoginPage").
@@ -34,7 +37,10 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
 		permitAll().
 		and().
 		logout().
-		permitAll();
+		permitAll().
+		and().
+		exceptionHandling().accessDeniedPage("/access-denied");//if access denied display this site
+		
 	}
 
 }
